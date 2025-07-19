@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="Content-Type" content="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=utf-8" />
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Acta de Entrega - Compra</title>
+        <title>Acta de Entrega - Productos Farmacéuticos y de Salud</title>
     </head>
     <body>
         <div>
@@ -29,7 +29,7 @@
                 </tr>
                 <tr>
                     <td><strong>Sede/Establecimiento:</strong></td>
-                    <td>{{$establishment->address}} - {{$establishment->department->description}} - {{$establishment->district->description}}</td>
+                    <td>{{$establishment->address}} - {{$establishment->department->description ?? ''}} - {{$establishment->district->description ?? ''}}</td>
                     <td><strong>Hora:</strong></td>
                     <td>{{date('H:i:s')}}</td>
                 </tr>
@@ -85,8 +85,16 @@
                         <td style="border: 1px solid black; padding: 5px;">{{ $item->item->internal_id ?? $item->item->id }}</td>
                         <td style="border: 1px solid black; padding: 5px;">{{ $item->item->description }}</td>
                         <td style="border: 1px solid black; padding: 5px; text-align: center;">{{ $item->item->unit_type->description ?? 'UND' }}</td>
-                        <td style="border: 1px solid black; padding: 5px; text-align: center;">{{ $item->lot_code ?? 'N/A' }}</td>
-                        <td style="border: 1px solid black; padding: 5px; text-align: center;">{{ $item->date_of_due ? $item->date_of_due->format('d/m/Y') : 'N/A' }}</td>
+                        <td style="border: 1px solid black; padding: 5px; text-align: center;">{{ $item->lot_code ?? ($item->item->lot_code ?? 'N/A') }}</td>
+                        <td style="border: 1px solid black; padding: 5px; text-align: center;">
+                            @if(isset($item->date_of_due) && $item->date_of_due)
+                                {{ $item->date_of_due->format('d/m/Y') }}
+                            @elseif(isset($item->item->date_of_due) && $item->item->date_of_due)
+                                {{ $item->item->date_of_due->format('d/m/Y') }}
+                            @else
+                                N/A
+                            @endif
+                        </td>
                         <td style="border: 1px solid black; padding: 5px; text-align: center;">{{ number_format($item->quantity, 0) }}</td>
                         <td style="border: 1px solid black; padding: 5px; text-align: right;">{{ $document->currency_type_id }} {{ number_format($item->unit_price, 2) }}</td>
                         <td style="border: 1px solid black; padding: 5px; text-align: right;">{{ $document->currency_type_id }} {{ number_format($item->total, 2) }}</td>
@@ -111,7 +119,7 @@
                             </tr>
                             @if($document->total_igv > 0)
                             <tr>
-                                <td style="border: 1px solid black; padding: 5px;"><strong>IGV:</strong></td>
+                                <td style="border: 1px solid black; padding: 5px;"><strong>IVA:</strong></td>
                                 <td style="border: 1px solid black; padding: 5px; text-align: right;">{{ $document->currency_type_id }} {{ number_format($document->total_igv, 2) }}</td>
                             </tr>
                             @endif
