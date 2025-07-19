@@ -99,8 +99,7 @@
                             <button v-if="row.state_type_id != '11'" type="button" class="btn waves-effect waves-light btn-xs btn-danger" @click.prevent="clickAnulate(row.id)">Anular</button>
                             <button v-if="row.state_type_id == '11'" type="button" class="btn waves-effect waves-light btn-xs btn-danger" @click.prevent="clickDelete(row.id)">Eliminar</button>
                             <a :href="`/${resource}/pdf/${row.id}`" type="button" class="btn waves-effect waves-light btn-xs btn-info" target="_blank">PDF</a>
-                            <!-- Botón Acta -->
-                            <button type="button" class="btn waves-effect waves-light btn-xs btn-success" @click.prevent="downloadActa(row.id)">Acta</button>
+                            <a :href="`/${resource}/acta/${row.id}`" type="button" class="btn waves-effect waves-light btn-xs btn-success" target="_blank">Acta</a>
 
                         </td>
                     </tr>
@@ -221,9 +220,6 @@
             },
              clickImport() {
                 this.showImportDialog = true
-            },
-            downloadActa(id) {
-                window.open(`/purchases/acta/${id}`, '_blank');
             },
             formatNumber(number) {
                 return number ? new Intl.NumberFormat('en-US', {

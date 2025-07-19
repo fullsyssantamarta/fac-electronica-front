@@ -40,6 +40,9 @@ use Modules\Factcolombia1\Models\Tenant\{
     Tax,
 };
 use Barryvdh\DomPDF\Facade as PDF;
+use App\Exports\PurchaseExport;
+use App\Exports\PurchaseActaExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Modules\Accounting\Models\JournalEntry;
 use Modules\Accounting\Models\JournalPrefix;
 use Modules\Accounting\Models\ChartOfAccount;
@@ -47,8 +50,6 @@ use Modules\Accounting\Models\ChartAccountSaleConfiguration;
 use Modules\Accounting\Models\AccountingChartAccountConfiguration;
 use Modules\Accounting\Helpers\AccountBalanceHelper;
 use Modules\Accounting\Helpers\AccountingEntryHelper;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class PurchaseController extends Controller
 {
@@ -689,7 +690,7 @@ class PurchaseController extends Controller
                 'unit_type' => $row->unit_type,
                 'tax' => $row->tax,
                 'stock' => $stock,
-            };
+            ];
         });
     }
 
@@ -878,70 +879,18 @@ class PurchaseController extends Controller
         return $pdf->stream($filename.'.pdf');
     }
 
-    public function actaExcel($id)
+    public function acta($id)
     {
-        $purchase = Purchase::with(['items', 'supplier'])->findOrFail($id);
+        $document = Purchase::findOrFail($id);
+        $establishment = Establishment::where('id', $document->establishment_id)->first();
+        $company = Company::active();
 
-        // Datos generales
-        $fecha = $purchase->date_of_issue;
-        $numero_acta = 'ACTA-' . $purchase->id;
-        $recibido_por = auth()->user()->name;
-        $entregado_por = $purchase->supplier->name;
+        $filename = 'ACTA_ENTREGA_'.$document->series.$document->number.'.xlsx';
 
-        // Crear Excel
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        // Header
-        $sheet->setCellValue('A1', 'ACTA DE RECEPCIÓN DE EQUIPOS');
-        $sheet->mergeCells('A1:E1');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
-
-        // Información general
-        $sheet->setCellValue('A3', 'Fecha:');
-        $sheet->setCellValue('B3', $fecha);
-        $sheet->setCellValue('D3', 'Número de Acta:');
-        $sheet->setCellValue('E3', $numero_acta);
-
-        $sheet->setCellValue('A4', 'Recibido por:');
-        $sheet->setCellValue('B4', $recibido_por);
-        $sheet->setCellValue('D4', 'Entregado por:');
-        $sheet->setCellValue('E4', $entregado_por);
-
-        // Tabla de items
-        $sheet->setCellValue('A6', '#');
-        $sheet->setCellValue('B6', 'Descripción');
-        $sheet->setCellValue('C6', 'Cantidad');
-        $sheet->setCellValue('D6', 'Estado');
-        $sheet->setCellValue('E6', 'Observaciones');
-        $sheet->getStyle('A6:E6')->getFont()->setBold(true);
-
-        $rowNum = 7;
-        foreach ($purchase->items as $idx => $item) {
-            $sheet->setCellValue('A'.$rowNum, $idx + 1);
-            $sheet->setCellValue('B'.$rowNum, $item->description ?? $item->item->description ?? '');
-            $sheet->setCellValue('C'.$rowNum, $item->quantity);
-            $sheet->setCellValue('D'.$rowNum, 'Bueno'); // Puedes cambiar el estado si tienes ese dato
-            $sheet->setCellValue('E'.$rowNum, ''); // Observaciones vacías
-            $rowNum++;
-        }
-
-        // Firmas
-        $sheet->setCellValue('B'.($rowNum+2), '_________________________');
-        $sheet->setCellValue('B'.($rowNum+3), 'Entregado por');
-        $sheet->setCellValue('D'.($rowNum+2), '_________________________');
-        $sheet->setCellValue('D'.($rowNum+3), 'Recibido por');
-
-        // Descargar archivo
-        $filename = 'acta_recepcion_'.$purchase->id.'.xlsx';
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-        header('Cache-Control: max-age=0');
-
-        $writer = new Xlsx($spreadsheet);
-        $writer->save('php://output');
-        exit;
+        return Excel::download(
+            new PurchaseActaExport($document, $company, $establishment),
+            $filename
+        );
     }
 
 
