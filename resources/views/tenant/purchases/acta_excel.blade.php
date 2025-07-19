@@ -9,26 +9,26 @@
     </head>
     <body>
         <div>
-            <h2 align="center" class="title"><strong>ACTA DE ENTREGA - COMPRA</strong></h2>
+            <h2 align="center" class="title"><strong>ACTA DE ENTREGA - PRODUCTOS FARMACÉUTICOS Y DE SALUD</strong></h2>
         </div>
         <br>
         
         <div style="margin-top:20px; margin-bottom:15px;">
             <table>
                 <tr>
-                    <td><strong>Empresa:</strong></td>
+                    <td><strong>Institución de Salud:</strong></td>
                     <td>{{$company->name}}</td>
                     <td><strong>Fecha de Documento:</strong></td>
                     <td>{{$document->date_of_issue->format('d/m/Y')}}</td>
                 </tr>
                 <tr>
-                    <td><strong>RUT:</strong></td>
+                    <td><strong>NIT:</strong></td>
                     <td>{{$company->number}}</td>
                     <td><strong>Fecha de Entrega:</strong></td>
                     <td>{{date('d/m/Y')}}</td>
                 </tr>
                 <tr>
-                    <td><strong>Establecimiento:</strong></td>
+                    <td><strong>Sede/Establecimiento:</strong></td>
                     <td>{{$establishment->address}} - {{$establishment->department->description}} - {{$establishment->district->description}}</td>
                     <td><strong>Hora:</strong></td>
                     <td>{{date('H:i:s')}}</td>
@@ -40,15 +40,15 @@
         <div style="margin-bottom:15px;">
             <table>
                 <tr>
-                    <td><strong>Documento de Compra:</strong></td>
+                    <td><strong>Orden de Compra:</strong></td>
                     <td>{{$document->series}}-{{$document->number}}</td>
                 </tr>
                 <tr>
-                    <td><strong>Proveedor:</strong></td>
+                    <td><strong>Proveedor/Laboratorio:</strong></td>
                     <td>{{$document->supplier->name}}</td>
                 </tr>
                 <tr>
-                    <td><strong>RUC/DNI Proveedor:</strong></td>
+                    <td><strong>NIT Proveedor:</strong></td>
                     <td>{{$document->supplier->number}}</td>
                 </tr>
                 @if($document->supplier->address)
@@ -66,13 +66,15 @@
                 <thead>
                     <tr style="background-color: #f0f0f0;">
                         <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Item</strong></th>
-                        <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Código</strong></th>
-                        <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Descripción</strong></th>
-                        <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Unidad</strong></th>
+                        <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Código/EAN</strong></th>
+                        <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Descripción del Producto</strong></th>
+                        <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Presentación</strong></th>
+                        <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Lote</strong></th>
+                        <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Vencimiento</strong></th>
                         <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Cantidad</strong></th>
                         <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Precio Unit.</strong></th>
                         <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Total</strong></th>
-                        <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Estado Entrega</strong></th>
+                        <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Estado</strong></th>
                         <th style="border: 1px solid black; padding: 8px; text-align: center;"><strong>Observaciones</strong></th>
                     </tr>
                 </thead>
@@ -83,10 +85,12 @@
                         <td style="border: 1px solid black; padding: 5px;">{{ $item->item->internal_id ?? $item->item->id }}</td>
                         <td style="border: 1px solid black; padding: 5px;">{{ $item->item->description }}</td>
                         <td style="border: 1px solid black; padding: 5px; text-align: center;">{{ $item->item->unit_type->description ?? 'UND' }}</td>
-                        <td style="border: 1px solid black; padding: 5px; text-align: center;">{{ number_format($item->quantity, 2) }}</td>
+                        <td style="border: 1px solid black; padding: 5px; text-align: center;">{{ $item->lot_code ?? 'N/A' }}</td>
+                        <td style="border: 1px solid black; padding: 5px; text-align: center;">{{ $item->date_of_due ? $item->date_of_due->format('d/m/Y') : 'N/A' }}</td>
+                        <td style="border: 1px solid black; padding: 5px; text-align: center;">{{ number_format($item->quantity, 0) }}</td>
                         <td style="border: 1px solid black; padding: 5px; text-align: right;">{{ $document->currency_type_id }} {{ number_format($item->unit_price, 2) }}</td>
                         <td style="border: 1px solid black; padding: 5px; text-align: right;">{{ $document->currency_type_id }} {{ number_format($item->total, 2) }}</td>
-                        <td style="border: 1px solid black; padding: 5px; text-align: center;">RECIBIDO</td>
+                        <td style="border: 1px solid black; padding: 5px; text-align: center;">CONFORME</td>
                         <td style="border: 1px solid black; padding: 5px;"></td>
                     </tr>
                     @endforeach
@@ -128,12 +132,14 @@
                     <td style="width: 50%; text-align: center; border-top: 1px solid black; padding-top: 5px;">
                         <strong>ENTREGADO POR</strong><br>
                         {{$document->supplier->name}}<br>
-                        Firma y sello
+                        <small>Representante del Laboratorio/Proveedor</small><br>
+                        Firma, Nombre y Cédula
                     </td>
                     <td style="width: 50%; text-align: center; border-top: 1px solid black; padding-top: 5px;">
                         <strong>RECIBIDO POR</strong><br>
                         {{$company->name}}<br>
-                        Firma y sello
+                        <small>Responsable de Farmacia/Almacén</small><br>
+                        Firma, Nombre y Cédula
                     </td>
                 </tr>
             </table>
@@ -144,11 +150,18 @@
             <table style="width: 100%; border: 1px solid black; border-collapse: collapse;">
                 <tr style="background-color: #f0f0f0;">
                     <td style="border: 1px solid black; padding: 8px; text-align: center;" colspan="2">
-                        <strong>OBSERVACIONES GENERALES</strong>
+                        <strong>CONDICIONES DE ALMACENAMIENTO Y OBSERVACIONES</strong>
                     </td>
                 </tr>
                 <tr>
                     <td style="border: 1px solid black; padding: 20px; height: 80px; vertical-align: top;">
+                        <strong>Condiciones de almacenamiento verificadas:</strong><br>
+                        □ Temperatura ambiente (15°C - 25°C)<br>
+                        □ Refrigeración (2°C - 8°C)<br>
+                        □ Congelación (-15°C a -25°C)<br>
+                        □ Protegido de la luz<br>
+                        □ Lugar seco<br><br>
+                        <strong>Observaciones adicionales:</strong><br>
                         <!-- Espacio para observaciones manuales -->
                     </td>
                 </tr>
@@ -156,7 +169,8 @@
         </div>
 
         <div style="margin-top:20px; font-size: 10px; text-align: center; color: #666;">
-            <p>Documento generado automáticamente el {{date('d/m/Y H:i:s')}}</p>
+            <p>Acta de entrega farmacéutica generada automáticamente el {{date('d/m/Y H:i:s')}}</p>
+            <p><em>Este documento certifica la recepción conforme de productos farmacéuticos y de salud</em></p>
         </div>
     </body>
 </html>
